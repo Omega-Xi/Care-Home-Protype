@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CareFlow Pro — Client-Ready Care Home Demo</title>
+<style>
+:root{
+  --bg0:#030712;
+  --bg1:#07162b;
+  --bg2:#0b2142;
+  --glass:rgba(255,255,255,.078);
+  --glass-strong:rgba(10,27,54,.84);
+  --glass-soft:rgba(255,255,255,.045);
+  --border:rgba(255,255,255,.14);
+  --border-bright:rgba(61,220,255,.34);
+  --text:#eef8ff;
+  --muted:#9fb6d6;
+  --cyan:#3ddcff;
+  --blue:#4f7cff;
+  --violet:#8b5cf6;
+  --green:#56f0a7;
+  --amber:#ffbd59;
+  --red:#ff7f9a;
+  --shadow:0 28px 90px rgba(0,0,0,.38);
+  --radius:24px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 12% 0%,rgba(79,124,255,.42),transparent 32%),
+    radial-gradient(circle at 86% 8%,rgba(61,220,255,.24),transparent 30%),
+    radial-gradient(circle at 50% 100%,rgba(139,92,246,.20),transparent 36%),
+    linear-gradient(135deg,var(--bg0),var(--bg1) 55%,var(--bg2));
+  overflow-x:hidden;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 82%);
+}
+button,input,select,textarea{font:inherit}
+button{
+  cursor:pointer;
+  border:0;
+  color:#fff;
+  border-radius:14px;
+  padding:11px 14px;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  box-shadow:0 12px 34px rgba(61,220,255,.18);
+  transition:.18s ease;
+}
+button:hover{transform:translateY(-1px);filter:brightness(1.08)}
+button.secondary{
+  background:rgba(255,255,255,.09);
+  border:1px solid var(--border);
+  box-shadow:none;
+}
+button.danger{background:linear-gradient(135deg,#ff477e,#ff9a63)}
+button.success{background:linear-gradient(135deg,#18b981,#56f0a7)}
+button.small{padding:7px 10px;border-radius:10px;font-size:12px}
+button.full{width:100%}
+input,select,textarea{
+  width:100%;
+  border:1px solid var(--border);
+  background:rgba(6,18,35,.78);
+  color:var(--text);
+  border-radius:14px;
+  padding:11px 12px;
+  outline:none;
+}
+textarea{min-height:110px;resize:vertical}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
+h1,h2,h3,p{margin-top:0}
+p{color:var(--muted);line-height:1.55}
+a{color:var(--cyan)}
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:400;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:10px 18px;
+  background:rgba(3,10,21,.72);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.brand-mini{display:flex;align-items:center;gap:12px;min-width:0}
+.logo-mark{
+  width:42px;height:42px;border-radius:16px;
+  display:grid;place-items:center;
+  color:#051225;font-weight:950;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  box-shadow:0 16px 44px rgba(61,220,255,.25);
+}
+.brand-mini b{display:block;white-space:nowrap}
+.brand-mini span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.session-switcher{display:flex;align-items:center;gap:10px;min-width:280px}
+.session-switcher label{margin:0;white-space:nowrap}
+.app-shell{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  min-height:100vh;
+  padding-top:64px;
+}
+.sidebar{
+  position:sticky;
+  top:64px;
+  height:calc(100vh - 64px);
+  padding:18px;
+  background:rgba(3,10,21,.58);
+  backdrop-filter:blur(24px);
+  border-right:1px solid var(--border);
+  overflow:auto;
+}
+.main{padding:18px 20px 42px;min-width:0}
+.card,.glass{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(22px);
+}
+.card.soft{box-shadow:none;background:var(--glass-soft)}
+.nav button,.tour button{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:8px 0;
+  background:transparent;
+  border:1px solid transparent;
+  box-shadow:none;
+  text-align:left;
+}
+.nav button.active,.tour button.active{
+  background:rgba(61,220,255,.12);
+  border-color:var(--border-bright);
+}
+.side-section{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:14px;
+  margin-bottom:16px;
+}
+.hero{
+  display:grid;
+  grid-template-columns:1.2fr .9fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+.hero-title{
+  font-size:clamp(30px,4vw,56px);
+  line-height:1.03;
+  margin-bottom:12px;
+  letter-spacing:-1.5px;
+}
+.gradient-text{
+  background:linear-gradient(135deg,#fff,var(--cyan),#a8b2ff);
+  background-clip: text;
+  -webkit-background-clip:text;
+  color:transparent;
+}
+.badge{
+  display:inline-flex;
+  gap:7px;
+  align-items:center;
+  padding:5px 10px;
+  border-radius:999px;
+  background:rgba(61,220,255,.12);
+  border:1px solid rgba(61,220,255,.24);
+  color:#d1f8ff;
+  font-size:12px;
+}
+.badge.warn{background:rgba(255,189,89,.12);border-color:rgba(255,189,89,.28);color:#ffe1aa}
+.badge.bad{background:rgba(255,127,154,.12);border-color:rgba(255,127,154,.34);color:#ffc4d0}
+.badge.good{background:rgba(86,240,167,.12);border-color:rgba(86,240,167,.30);color:#c7ffe3}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+.kpi{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:16px;
+  backdrop-filter:blur(18px);
+}
+.kpi .num{font-size:32px;font-weight:850;letter-spacing:-1px}
+.kpi .label{color:var(--muted);font-size:13px}
+.kpi .trend{font-size:12px;margin-top:8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.item{
+  border:1px solid var(--border);
+  background:var(--glass-soft);
+  border-radius:16px;
+  padding:12px;
+  margin:10px 0;
+}
+.item-header{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.good{color:var(--green)}.warn-text{color:var(--amber)}.bad-text{color:var(--red)}.cyan{color:var(--cyan)}.muted{color:var(--muted)}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:11px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;font-size:14px;vertical-align:top}
+.table th{color:#b9c9e4;font-weight:600}
+.progress{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:999px}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(138px,1fr));gap:10px;overflow:auto}
+.day{
+  min-height:212px;
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:10px;
+}
+.shift-chip{
+  padding:8px;
+  border-radius:12px;
+  background:rgba(61,220,255,.1);
+  border:1px solid rgba(61,220,255,.2);
+  margin-top:8px;
+  font-size:12px;
+  cursor:grab;
+  transition:.18s;
+}
+.shift-chip:hover{transform:translateY(-2px);border-color:rgba(61,220,255,.55)}
+.shift-chip.risk{background:rgba(255,127,154,.13);border-color:rgba(255,127,154,.34)}
+.dropzone{outline:2px dashed rgba(61,220,255,.45);background:rgba(61,220,255,.08)}
+.ai-card{
+  background:
+    radial-gradient(circle at 0% 0%,rgba(61,220,255,.20),transparent 38%),
+    linear-gradient(135deg,rgba(139,92,246,.16),rgba(61,220,255,.08));
+  border-color:rgba(139,92,246,.34);
+}
+.big-alert{border-color:rgba(255,127,154,.45);background:rgba(255,127,154,.10)}
+.roi-box{background:linear-gradient(135deg,rgba(86,240,167,.14),rgba(61,220,255,.09));border-color:rgba(86,240,167,.25)}
+.export-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.chart{height:210px;display:flex;align-items:end;gap:12px;padding-top:20px}
+.bar{flex:1;min-width:18px;background:linear-gradient(180deg,var(--cyan),var(--blue));border-radius:12px 12px 4px 4px;position:relative;opacity:.92}
+.bar:after{content:attr(data-label);position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);color:var(--muted);font-size:11px}
+.timeline{position:relative;padding-left:18px}
+.timeline:before{content:"";position:absolute;left:3px;top:4px;bottom:4px;width:2px;background:rgba(61,220,255,.25)}
+.timeline .item{position:relative}
+.timeline .item:before{content:"";position:absolute;left:-20px;top:18px;width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 18px var(--cyan)}
+.toast{
+  position:fixed;right:18px;bottom:18px;z-index:999;max-width:520px;
+  background:rgba(5,13,26,.94);border:1px solid var(--border-bright);
+  border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);display:none;
+}
+.toast.show{display:block;animation:pop .25s ease}
+@keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;z-index:700;padding:18px;
+}
+.modal.show{display:flex}
+.modal .glass{max-width:900px;width:100%;max-height:90vh;overflow:auto}
+.slide{
+  min-height:520px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.slide h1{font-size:clamp(34px,5vw,64px);line-height:1.04;letter-spacing:-1.6px}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap}
+.mobile-tabs{display:none}
+.metric-pair{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+.arrow{font-size:30px;color:var(--cyan)}
+.client-name-card{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:end}
+@media(max-width:1180px){
+  .app-shell{grid-template-columns:1fr}
+  .sidebar{position:relative;top:auto;height:auto}
+  .nav,.tour{display:none}
+  .mobile-tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+  .hero,.grid-2,.grid-3,.grid-4,.client-name-card{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .session-switcher{min-width:220px}
+}
+@media(max-width:680px){
+  .topbar{height:auto;align-items:flex-start;flex-direction:column}
+  .app-shell{padding-top:126px}
+  .main{padding:12px}
+  .kpi-grid,.export-row,.metric-pair{grid-template-columns:1fr}
+  .calendar{grid-template-columns:1fr}
+  .arrow{display:none}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand-mini">
+    <div class="logo-mark">CF</div>
+    <div><b>CareFlow Pro</b><span id="topClientName">Client-ready care home demo</span></div>
+  </div>
+  <div class="session-switcher">
+    <label>Global User Session</label>
+    <select id="sessionSelect"></select>
+  </div>
+</header>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="side-section">
+      <span class="badge good">Best Client Pitch Version</span>
+      <p style="font-size:12px;margin:10px 0 0">Branded dashboard, guided presentation, safe-staffing logic, compliance checks, payroll exports and pilot proposal.</p>
+    </div>
+    <div class="nav" id="nav"></div>
+    <div class="side-section tour" id="tour"></div>
+    <div class="side-section">
+      <span class="badge">Demo Controls</span>
+      <p style="font-size:12px;margin-top:10px">Reset before a new presentation.</p>
+      <button class="secondary small full" onclick="resetDemo()">Reset demo data</button>
+    </div>
+  </aside>
+  <main class="main">
+    <div id="mobileTabs" class="mobile-tabs"></div>
+    <div id="app"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="modal">
+  <div class="glass">
+    <div style="display:flex;justify-content:space-between;gap:16px;align-items:center">
+      <h2 id="modalTitle">Details</h2>
+      <button class="secondary small" onclick="closeModal()">Close</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const DB_KEY='careflow_best_client_demo_v1';
+const MS_HOUR=36e5;
+const users=[
+  {name:'Care Manager',admin:true},
+  {name:'Sarah Jenkins'},
+  {name:'David Vance'},
+  {name:'Emily Stone'}
+];
+const managerTabs=[
+  ['command','Command Centre'],
+  ['rota','Smart Rota'],
+  ['compliance','CQC & Compliance'],
+  ['payroll','Payroll'],
+  ['proposal','Pilot Proposal']
+];
+const staffTabs=[
+  ['my','My Dashboard'],
+  ['clock','Punch Clock'],
+  ['requests','Requests']
+];
+let currentTab='command';
+let draggedShiftId=null;
+let presentationIndex=0;
+
+function addHours(date,h){return new Date(new Date(date).getTime()+h*MS_HOUR)}
+function iso(d){return new Date(d).toISOString()}
+function fmt(dt){return new Date(dt).toLocaleString([], {dateStyle:'medium', timeStyle:'short'})}
+function dateOnly(dt){return new Date(dt).toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'})}
+function timeOnly(dt){return new Date(dt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+function duration(a,b){return Math.round(((new Date(b)-new Date(a))/MS_HOUR)*100)/100}
+function money(n){return '£'+Number(n).toLocaleString(undefined,{maximumFractionDigits:0})}
+function daysUntil(expiry){return Math.ceil((new Date(expiry)-new Date())/(24*MS_HOUR))}
+function uid(){return Date.now()+Math.floor(Math.random()*1000)}
+
+function seed(){
+  if(localStorage.getItem(DB_KEY)) return;
+  const now=new Date();
+  const base=new Date(now.getFullYear(),now.getMonth(),now.getDate(),7,0,0);
+  const db={
+    ClientProfile:{
+      HomeName:'Rosewood Manor Care Home',
+      Location:'Surrey, UK',
+      GroupName:'Independent Care Group',
+      PresenterNote:'30-day pilot proposal focused on rota safety, agency spend and CQC evidence readiness.'
+    },
+    Staff:[
+      {Id:1,Name:'Sarah Jenkins',Role:'Carer',ContractedHours:37.5,HourlyRate:13.25,TrainingScore:82,DBS:'Clear',Skills:['Residential','Dementia']},
+      {Id:2,Name:'David Vance',Role:'Nurse',ContractedHours:37.5,HourlyRate:22.50,TrainingScore:96,DBS:'Clear',Skills:['Nursing','Medication']},
+      {Id:3,Name:'Emily Stone',Role:'Senior Carer',ContractedHours:37.5,HourlyRate:16.75,TrainingScore:91,DBS:'Clear',Skills:['Residential','Dementia','Night Team']}
+    ],
+    Units:[
+      {Name:'Residential',Residents:22,Dependency:'Mixed',RequiredCarerRatio:8,RequiredSeniorRatio:16,NurseRequired:false},
+      {Name:'Dementia',Residents:9,Dependency:'High',RequiredCarerRatio:5,RequiredSeniorRatio:12,NurseRequired:false},
+      {Name:'Nursing',Residents:12,Dependency:'High',RequiredCarerRatio:6,RequiredSeniorRatio:12,NurseRequired:true},
+      {Name:'Night Team',Residents:43,Dependency:'Mixed',RequiredCarerRatio:14,RequiredSeniorRatio:43,NurseRequired:true}
+    ],
+    CareMetrics:{
+      Capacity:50,
+      Occupied:43,
+      HighDependency:11,
+      MedicationRoundsToday:128,
+      IncidentsOpen:3,
+      CallBellAverageMinutes:4.8
+    },
+    Commercials:{
+      CurrentAgencySpend:12840,
+      OptimisedAgencySpend:9120,
+      PayrollLeakage:1180,
+      AdminHoursSavedMonthly:26,
+      SuggestedMonthlyPrice:599,
+      PilotPrice:399
+    },
+    ScheduledShifts:[
+      {Id:101,StaffId:1,StartTime:iso(base),EndTime:iso(addHours(base,8)),RequiredRole:'Carer',Unit:'Residential',Status:'Published'},
+      {Id:102,StaffId:2,StartTime:iso(addHours(base,1)),EndTime:iso(addHours(base,13)),RequiredRole:'Nurse',Unit:'Nursing',Status:'Published'},
+      {Id:103,StaffId:3,StartTime:iso(addHours(base,8.5)),EndTime:iso(addHours(base,16.5)),RequiredRole:'Senior Carer',Unit:'Residential',Status:'Published'},
+      {Id:104,StaffId:1,StartTime:iso(addHours(base,25)),EndTime:iso(addHours(base,33)),RequiredRole:'Carer',Unit:'Residential',Status:'Published'},
+      {Id:105,StaffId:2,StartTime:iso(addHours(base,49)),EndTime:iso(addHours(base,61)),RequiredRole:'Nurse',Unit:'Nursing',Status:'Published'},
+      {Id:106,StaffId:3,StartTime:iso(addHours(base,73)),EndTime:iso(addHours(base,81)),RequiredRole:'Senior Carer',Unit:'Dementia',Status:'Published'}
+    ],
+    TimesheetEntries:[
+      {Id:201,StaffId:1,ScheduledShiftId:101,ActualClockIn:iso(addHours(base,.08)),ActualClockOut:iso(addHours(base,8.1)),ApprovedHours:0,IsApproved:false},
+      {Id:202,StaffId:2,ScheduledShiftId:102,ActualClockIn:iso(addHours(base,.95)),ActualClockOut:null,ApprovedHours:0,IsApproved:false}
+    ],
+    TrainingRecords:[
+      {Id:501,StaffId:1,Name:'Manual Handling',ExpiryDate:iso(addHours(now,24*18))},
+      {Id:502,StaffId:2,Name:'Medication Administration',ExpiryDate:iso(addHours(now,24*92))},
+      {Id:503,StaffId:3,Name:'Safeguarding Adults',ExpiryDate:iso(addHours(now,24*41))},
+      {Id:504,StaffId:1,Name:'Fire Safety',ExpiryDate:iso(addHours(now,24*11))}
+    ],
+    LeaveRequests:[
+      {Id:301,StaffId:3,Type:'Annual Leave',Date:iso(addHours(base,120)),Status:'Pending'},
+      {Id:302,StaffId:1,Type:'Sickness',Date:iso(addHours(base,48)),Status:'Logged'}
+    ],
+    Incidents:[
+      {Id:401,Severity:'Low',Unit:'Residential',Text:'Call bell response exceeded target by 3 minutes.',Time:iso(addHours(now,-9))},
+      {Id:402,Severity:'Medium',Unit:'Nursing',Text:'Medication round variance flagged for manager review.',Time:iso(addHours(now,-26))},
+      {Id:403,Severity:'Low',Unit:'Dementia',Text:'Agency handover note missing signature.',Time:iso(addHours(now,-31))}
+    ],
+    AuditLog:[
+      {Time:iso(addHours(now,-1)),Text:'Safe staffing coverage confirmed for morning shift.'},
+      {Time:iso(addHours(now,-4)),Text:'Timesheet variance generated for Sarah Jenkins.'},
+      {Time:iso(addHours(now,-12)),Text:'Training expiry warning issued for Fire Safety.'}
+    ]
+  };
+  localStorage.setItem(DB_KEY,JSON.stringify(db));
+}
+function getDB(){return JSON.parse(localStorage.getItem(DB_KEY))}
+function saveDB(db){localStorage.setItem(DB_KEY,JSON.stringify(db));render()}
+function resetDemo(){localStorage.removeItem(DB_KEY);seed();currentTab='command';render();toast('Demo reset. Open Presentation Mode for the clean pitch sequence.')}
+seed();
+
+const session=document.getElementById('sessionSelect');
+users.forEach(u=>session.innerHTML+=`<option>${u.name}</option>`);
+session.value='Care Manager';
+session.onchange=()=>{currentTab=session.value==='Care Manager'?'command':'my';render()};
+
+function staffById(id){return getDB().Staff.find(s=>s.Id==id)}
+function activeStaff(){return getDB().Staff.find(s=>s.Name===session.value)}
+function tabList(){return session.value==='Care Manager'?managerTabs:staffTabs}
+function setTab(tab){currentTab=tab;render()}
+
+function roleLabel(role){
+  if(role==='Nurse') return 'Registered Nurse';
+  if(role==='Senior Carer') return 'Senior Carer';
+  return 'Care Assistant';
+}
+function findShift(id){return getDB().ScheduledShifts.find(s=>s.Id==id)}
+
+function complianceCheck(staffId,start,end,excludeId=null){
+  const db=getDB();
+  const ns=new Date(start), ne=new Date(end);
+  if(!start||!end||isNaN(ns)||isNaN(ne)||ne<=ns) return {ok:false,msg:'Choose a valid start and end time.'};
+  const shifts=db.ScheduledShifts.filter(s=>s.StaffId==staffId && s.Id!==excludeId);
+  const staff=staffById(staffId);
+  for(const s of shifts){
+    const ss=new Date(s.StartTime), se=new Date(s.EndTime);
+    if(ns<se && ne>ss){
+      return {ok:false,msg:`Rejected: ${staff.Name} already has an overlapping shift at this time.`};
+    }
+    const restAfterPrevious=(ns-se)/MS_HOUR;
+    const restBeforeNext=(ss-ne)/MS_HOUR;
+    if(restAfterPrevious>=0 && restAfterPrevious<11){
+      return {ok:false,msg:`Rejected: ${staff.Name} would only have ${restAfterPrevious.toFixed(1)} hours rest after the previous shift. UK daily rest rule requires 11.`};
+    }
+    if(restBeforeNext>=0 && restBeforeNext<11){
+      return {ok:false,msg:`Rejected: ${staff.Name} would only have ${restBeforeNext.toFixed(1)} hours rest before the next shift. UK daily rest rule requires 11.`};
+    }
+  }
+  const windowStart=new Date(ns.getTime()-7*24*MS_HOUR);
+  const windowEnd=new Date(ns.getTime()+7*24*MS_HOUR);
+  let total=duration(ns,ne);
+  shifts.forEach(s=>{
+    const ss=new Date(s.StartTime);
+    if(ss>=windowStart && ss<=windowEnd) total+=duration(s.StartTime,s.EndTime);
+  });
+  if(total>48){
+    return {ok:false,msg:`Rejected: rolling 7-day total would become ${total.toFixed(1)} hours. UK weekly working-time limit is 48.`};
+  }
+  return {ok:true,msg:'Accepted: no overlap, 11-hour rest preserved, and rolling 48-hour limit safe.'};
+}
+
+function coverageForUnit(unitName,day=new Date()){
+  const db=getDB();
+  const unit=db.Units.find(u=>u.Name===unitName);
+  const shifts=db.ScheduledShifts.filter(s=>s.Unit===unitName && new Date(s.StartTime).toDateString()===day.toDateString());
+  let carers=0, seniors=0, nurses=0;
+  shifts.forEach(s=>{
+    const st=staffById(s.StaffId);
+    if(st.Role==='Nurse') nurses++;
+    if(st.Role==='Senior Carer') seniors++;
+    if(st.Role==='Carer' || st.Role==='Senior Carer') carers++;
+  });
+  const requiredCarers=Math.max(1,Math.ceil(unit.Residents/unit.RequiredCarerRatio));
+  const requiredSeniors=Math.max(1,Math.ceil(unit.Residents/unit.RequiredSeniorRatio));
+  const nurseOk=!unit.NurseRequired || nurses>=1;
+  const carerOk=carers>=requiredCarers;
+  const seniorOk=seniors>=requiredSeniors || unit.Name==='Nursing';
+  const ok=carerOk && seniorOk && nurseOk;
+  return {unit,carers,seniors,nurses,requiredCarers,requiredSeniors,nurseOk,carerOk,seniorOk,ok};
+}
+
+function allCoverage(){
+  const db=getDB();
+  return db.Units.map(u=>coverageForUnit(u.Name));
+}
+
+function aiSuggestion(){
+  const db=getDB();
+  const gaps=allCoverage().filter(c=>!c.ok);
+  const now=new Date();
+  const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,20,0,0);
+  const end=addHours(start,8);
+  let target=gaps[0] || coverageForUnit('Night Team');
+  let candidates=db.Staff.map(st=>{
+    const check=complianceCheck(st.Id,start,end);
+    const skillMatch=st.Skills.includes(target.unit.Name) || st.Role==='Nurse' || st.Role==='Senior Carer';
+    return {st,check,skillMatch,score:(check.ok?50:0)+(skillMatch?35:0)+(st.Role==='Senior Carer'?10:0)+(st.Role==='Nurse'&&target.unit.NurseRequired?15:0)};
+  }).sort((a,b)=>b.score-a.score);
+  const best=candidates[0];
+  return {unit:target.unit.Name,start,end,best,coverage:target};
+}
+
+function renderShell(){
+  const db=getDB();
+  document.getElementById('topClientName').textContent=`${db.ClientProfile.HomeName} · ${db.ClientProfile.Location}`;
+  const nav=document.getElementById('nav');
+  const mobile=document.getElementById('mobileTabs');
+  const tabs=tabList();
+  nav.innerHTML=tabs.map(t=>`<button class="${currentTab===t[0]?'active':''}" onclick="setTab('${t[0]}')"><span>${t[1]}</span><span>›</span></button>`).join('');
+  mobile.innerHTML=tabs.map(t=>`<button class="${currentTab===t[0]?'active':''}" onclick="setTab('${t[0]}')">${t[1]}</button>`).join('');
+  const tour=document.getElementById('tour');
+  if(session.value==='Care Manager'){
+    tour.innerHTML=`<span class="badge">Presenter Flow</span>
+      <button onclick="openPresentation()"><span>Open Presentation Mode</span><span>▶</span></button>
+      <button onclick="demoStep(1)"><span>1. Start with pain</span><span>›</span></button>
+      <button onclick="demoStep(2)"><span>2. Block unsafe rota</span><span>›</span></button>
+      <button onclick="demoStep(3)"><span>3. Apply AI safe fix</span><span>›</span></button>
+      <button onclick="demoStep(4)"><span>4. Export payroll</span><span>›</span></button>
+      <button onclick="demoStep(5)"><span>5. Close pilot</span><span>›</span></button>`;
+  }else{
+    tour.innerHTML='';
+  }
+}
+
+function commandView(){
+  const db=getDB();
+  const c=db.CareMetrics;
+  const comm=db.Commercials;
+  const occupancy=Math.round(c.Occupied/c.Capacity*100);
+  const pending=db.TimesheetEntries.filter(t=>!t.IsApproved).length;
+  const trainingAlerts=db.TrainingRecords.filter(t=>daysUntil(t.ExpiryDate)<45).length;
+  const moneyAtRisk=comm.CurrentAgencySpend+comm.PayrollLeakage;
+  const saving=comm.CurrentAgencySpend-comm.OptimisedAgencySpend;
+  const coverage=allCoverage();
+  const gaps=coverage.filter(c=>!c.ok);
+  const ai=aiSuggestion();
+
+  return `
+  <section class="hero">
+    <div class="glass">
+      <span class="badge good">Client-branded opening screen</span>
+      <h1 class="hero-title">${db.ClientProfile.HomeName}: <span class="gradient-text">safe staffing, compliance and payroll in one view.</span></h1>
+      <p>Start the demo here. The client immediately sees staffing risk, money at risk, CQC evidence status, and the next operational action.</p>
+      <div class="pill-row">
+        <button onclick="openPresentation()">Presentation Mode</button>
+        <button class="secondary" onclick="setTab('rota')">Open Smart Rota</button>
+        <button class="secondary" onclick="setTab('proposal')">Show Pilot Proposal</button>
+      </div>
+    </div>
+    <div class="glass big-alert">
+      <h2>Money & Risk at Stake</h2>
+      <div class="item"><div class="item-header"><b>Money at risk this month</b><span class="bad-text">${money(moneyAtRisk)}</span></div><p>Agency forecast + payroll leakage before automation.</p></div>
+      <div class="item"><div class="item-header"><b>Next compliance risk</b><span class="warn-text">Fire Safety expires in 11 days</span></div><p>Automatic training alerts prevent last-minute CQC evidence gaps.</p></div>
+      <div class="item"><div class="item-header"><b>Safe staffing gaps</b><span class="${gaps.length?'bad-text':'good'}">${gaps.length}</span></div><p>Coverage calculated using resident count, dependency and role requirements.</p></div>
+    </div>
+  </section>
+
+  <section class="client-name-card card soft">
+    <div>
+      <label>Care Home Name</label>
+      <input id="brandHome" value="${escapeHtml(db.ClientProfile.HomeName)}">
+    </div>
+    <div>
+      <label>Location</label>
+      <input id="brandLocation" value="${escapeHtml(db.ClientProfile.Location)}">
+    </div>
+    <button onclick="saveBranding()">Apply Client Branding</button>
+  </section>
+
+  <section class="kpi-grid">
+    <div class="kpi"><div class="label">Occupancy</div><div class="num">${occupancy}%</div><div class="trend good">${c.Occupied}/${c.Capacity} beds occupied</div></div>
+    <div class="kpi"><div class="label">CQC Readiness</div><div class="num good">94%</div><div class="trend">Evidence pack current</div></div>
+    <div class="kpi"><div class="label">Agency Forecast</div><div class="num warn-text">${money(comm.CurrentAgencySpend)}</div><div class="trend">Current month</div></div>
+    <div class="kpi"><div class="label">Projected Saving</div><div class="num good">${money(saving)}</div><div class="trend">Monthly rota optimisation</div></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="glass">
+      <h2>Safe Staffing Ratio Monitor</h2>
+      ${coverage.map(cov=>`
+        <div class="item">
+          <div class="item-header"><b>${cov.unit.Name}</b><span class="${cov.ok?'good':'bad-text'}">${cov.ok?'Safe':'Gap'}</span></div>
+          <p>${cov.unit.Residents} residents · ${cov.unit.Dependency} dependency<br>
+          Carers: ${cov.carers}/${cov.requiredCarers} required · Senior cover: ${cov.seniors}/${cov.requiredSeniors} required · Nurse: ${cov.unit.NurseRequired?(cov.nurseOk?'Covered':'Needed'):'Not required'}</p>
+          <div class="progress"><span style="width:${Math.min(100,Math.round((cov.carers/Math.max(1,cov.requiredCarers))*100))}%"></span></div>
+        </div>`).join('')}
+    </div>
+    <div class="glass ai-card">
+      <span class="badge">AI Rota Assistant</span>
+      <h2>Suggested Action</h2>
+      <p>CareFlow has detected a ${ai.unit} staffing risk. The safest low-cost recommendation is:</p>
+      <div class="item">
+        <div class="item-header"><b>${ai.best.st.Name}</b><span class="${ai.best.check.ok?'good':'bad-text'}">${ai.best.check.ok?'Compliant':'Blocked'}</span></div>
+        <p>${roleLabel(ai.best.st.Role)} · ${fmt(ai.start)} → ${fmt(ai.end)}<br>${ai.best.check.msg}</p>
+      </div>
+      <button onclick="assignAISuggestion()">Assign Suggested Shift</button>
+      <button class="secondary" onclick="setTab('rota')">Review in Rota</button>
+    </div>
+  </section>
+
+  <section class="grid-2" style="margin-top:16px">
+    <div class="glass">
+      <h2>Before / After ROI</h2>
+      <div class="metric-pair">
+        <div class="item"><b>Before</b><h2 class="bad-text">${money(comm.CurrentAgencySpend)}</h2><p>Monthly agency forecast</p></div>
+        <div class="arrow">→</div>
+        <div class="item roi-box"><b>After</b><h2 class="good">${money(comm.OptimisedAgencySpend)}</h2><p>Optimised forecast</p></div>
+      </div>
+    </div>
+    <div class="glass">
+      <h2>Executive KPI Snapshot</h2>
+      <table class="table">
+        <tr><th>Metric</th><th>Current</th><th>Status</th></tr>
+        <tr><td>Medication rounds completed</td><td>${c.MedicationRoundsToday}</td><td class="good">On track</td></tr>
+        <tr><td>Open incidents</td><td>${db.Incidents.length}</td><td class="warn-text">Review</td></tr>
+        <tr><td>Training alerts</td><td>${trainingAlerts}</td><td class="warn-text">Action needed</td></tr>
+        <tr><td>Payroll approvals</td><td>${pending}</td><td class="warn-text">Pending</td></tr>
+      </table>
+    </div>
+  </section>`;
+}
+
+function rotaView(){
+  const db=getDB();
+  const days=[0,1,2,3,4,5,6].map(i=>{const day=new Date();day.setHours(0,0,0,0);day.setDate(day.getDate()+i);return day});
+  return `
+  <section class="grid-2">
+    <div class="glass">
+      <h2>Smart Shift Assignment</h2>
+      <p>Show this to clients: unsafe assignments are rejected with the exact compliance reason before the rota is published.</p>
+      <label>Staff</label><select id="newStaff">${db.Staff.map(s=>`<option value="${s.Id}">${s.Name} — ${roleLabel(s.Role)}</option>`).join('')}</select>
+      <label>Unit</label><select id="newUnit">${db.Units.map(u=>`<option>${u.Name}</option>`).join('')}</select>
+      <label>Start</label><input id="newStart" type="datetime-local">
+      <label>End</label><input id="newEnd" type="datetime-local">
+      <div class="pill-row" style="margin-top:10px">
+        <button onclick="addShift()">Assign Shift</button>
+        <button class="danger" onclick="simulateUnsafeShift()">Try unsafe shift</button>
+        <button class="secondary" onclick="loadSafeFix()">Load safe fix</button>
+      </div>
+      <div id="shiftMsg" style="margin-top:10px"></div>
+    </div>
+    <div class="glass ai-card">
+      <span class="badge">AI Assistant</span>
+      <h2>Recommended Fix</h2>
+      ${renderAISuggestionBlock()}
+    </div>
+  </section>
+
+  <section class="glass" style="margin-top:16px">
+    <div class="item-header"><h2>Weekly Rota Planner</h2><span class="badge">Drag/drop simulation</span></div>
+    <p>Drag a shift card onto another day. The system revalidates rest time, overlaps and weekly limit before accepting the move.</p>
+    <div class="calendar">
+      ${days.map(day=>{
+        const dayShifts=db.ScheduledShifts.filter(s=>new Date(s.StartTime).toDateString()===day.toDateString());
+        return `<div class="day" ondragover="allowDrop(event)" ondrop="dropShift(event,'${day.toISOString()}')" ondragenter="this.classList.add('dropzone')" ondragleave="this.classList.remove('dropzone')">
+          <b>${dateOnly(day)}</b>
+          ${dayShifts.map(s=>{
+            const st=staffById(s.StaffId);
+            const long=duration(s.StartTime,s.EndTime)>10;
+            return `<div class="shift-chip${long?' risk':''}" draggable="true" ondragstart="dragShift(event,${s.Id})" onclick="showShift(${s.Id})">
+              <b>${st.Name}</b><br>${s.Unit} · ${timeOnly(s.StartTime)}-${timeOnly(s.EndTime)}<br>
+              <span class="${long?'warn-text':'good'}">${long?'Long shift':'Compliant'}</span>
+            </div>`;
+          }).join('') || `<p class="muted" style="font-size:12px">No shifts</p>`}
+        </div>`;
+      }).join('')}
+    </div>
+  </section>
+
+  <section class="glass" style="margin-top:16px">
+    <h2>Safe Staffing Coverage by Unit</h2>
+    <table class="table">
+      <tr><th>Unit</th><th>Residents</th><th>Cover</th><th>Status</th></tr>
+      ${allCoverage().map(c=>`<tr>
+        <td>${c.unit.Name}</td><td>${c.unit.Residents}</td>
+        <td>Carers ${c.carers}/${c.requiredCarers}, Seniors ${c.seniors}/${c.requiredSeniors}, Nurses ${c.unit.NurseRequired?(c.nurses+'/1'):'N/A'}</td>
+        <td class="${c.ok?'good':'bad-text'}">${c.ok?'Safe':'Gap detected'}</td>
+      </tr>`).join('')}
+    </table>
+  </section>`;
+}
+
+function renderAISuggestionBlock(){
+  const ai=aiSuggestion();
+  return `<div class="item">
+    <div class="item-header"><b>${ai.best.st.Name}</b><span class="${ai.best.check.ok?'good':'bad-text'}">${ai.best.check.ok?'Compliant':'Blocked'}</span></div>
+    <p>${ai.unit} · ${fmt(ai.start)} → ${fmt(ai.end)}<br>${ai.best.check.msg}</p>
+  </div>
+  <button onclick="assignAISuggestion()">Assign Suggested Shift</button>
+  <button class="secondary" onclick="loadSafeFix()">Load Into Form</button>`;
+}
+
+function complianceView(){
+  const db=getDB();
+  const expiring=db.TrainingRecords.filter(t=>daysUntil(t.ExpiryDate)<45);
+  return `
+  <section class="kpi-grid">
+    <div class="kpi"><div class="label">Compliance Score</div><div class="num good">94%</div><div class="trend">Inspection-ready evidence</div></div>
+    <div class="kpi"><div class="label">Training Alerts</div><div class="num warn-text">${expiring.length}</div><div class="trend">Expiring soon</div></div>
+    <div class="kpi"><div class="label">Rest Breaches</div><div class="num good">0</div><div class="trend">Blocked before assignment</div></div>
+    <div class="kpi"><div class="label">Incident Actions</div><div class="num warn-text">${db.Incidents.length}</div><div class="trend">Needs review</div></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="glass">
+      <h2>CQC Evidence Centre</h2>
+      ${[
+        ['Safe staffing rota export','Ready'],
+        ['Training certificate matrix','Ready'],
+        ['Medication variance audit','Review'],
+        ['Incident and safeguarding register','Ready'],
+        ['DBS and right-to-work records','Ready'],
+        ['Payroll and working-time audit','Ready']
+      ].map(row=>`<div class="item"><div class="item-header"><b>${row[0]}</b><span class="${row[1]==='Ready'?'good':'warn-text'}">${row[1]}</span></div></div>`).join('')}
+      <div class="export-row">
+        <button onclick="downloadEvidencePack()">Generate Evidence CSV</button>
+        <button class="secondary" onclick="downloadTrainingCSV()">Training Matrix CSV</button>
+        <button class="secondary" onclick="downloadRotaCSV()">Rota CSV</button>
+      </div>
+    </div>
+    <div class="glass">
+      <h2>Training Expiry Heatmap</h2>
+      ${db.TrainingRecords.map(t=>{
+        const st=staffById(t.StaffId), days=daysUntil(t.ExpiryDate);
+        return `<div class="item"><div class="item-header"><b>${t.Name}</b><span class="${days<20?'bad-text':days<45?'warn-text':'good'}">${days} days</span></div><p>${st.Name}</p></div>`;
+      }).join('')}
+    </div>
+  </section>
+
+  <section class="grid-2" style="margin-top:16px">
+    <div class="glass">
+      <h2>Incident & Risk Register</h2>
+      ${db.Incidents.map(i=>`<div class="item"><div class="item-header"><b>${i.Severity} · ${i.Unit}</b><span>${fmt(i.Time)}</span></div><p>${i.Text}</p></div>`).join('')}
+    </div>
+    <div class="glass">
+      <h2>Audit Trail</h2>
+      <div class="timeline">${db.AuditLog.map(a=>`<div class="item"><b>${fmt(a.Time)}</b><p>${a.Text}</p></div>`).join('')}</div>
+    </div>
+  </section>`;
+}
+
+function payrollView(){
+  const db=getDB();
+  return `
+  <section class="grid-2">
+    <div class="glass">
+      <h2>Timesheet Approval Queue</h2>
+      <p>Managers see scheduled vs actual time side-by-side before approving payroll hours.</p>
+      ${db.TimesheetEntries.map(t=>{
+        const st=staffById(t.StaffId), shift=db.ScheduledShifts.find(s=>s.Id===t.ScheduledShiftId);
+        const actual=t.ActualClockOut?duration(t.ActualClockIn,t.ActualClockOut):0;
+        const scheduled=shift?duration(shift.StartTime,shift.EndTime):0;
+        const suggested=actual || scheduled || 0;
+        return `<div class="item">
+          <div class="item-header"><b>${st.Name}</b><span class="${t.IsApproved?'good':'warn-text'}">${t.IsApproved?'Approved':'Pending'}</span></div>
+          <div class="grid-2" style="gap:10px">
+            <p><b>Scheduled</b><br>${shift?fmt(shift.StartTime)+' → '+fmt(shift.EndTime):'Ad hoc'}<br>${scheduled} hrs</p>
+            <p><b>Actual</b><br>${fmt(t.ActualClockIn)} → ${t.ActualClockOut?fmt(t.ActualClockOut):'Active'}<br>${actual || 'Active'} hrs</p>
+          </div>
+          <p>Variance: <span class="${Math.abs(actual-scheduled)>.25?'warn-text':'good'}">${(actual-scheduled).toFixed(2)} hrs</span></p>
+          <label>Approved Hours</label>
+          <input id="approved_${t.Id}" type="number" step="0.25" value="${t.ApprovedHours || suggested}">
+          <button onclick="approveTimesheet(${t.Id})">Approve Timesheet</button>
+        </div>`;
+      }).join('') || '<p>No timesheets yet.</p>'}
+    </div>
+    <div class="glass">
+      <h2>Payroll Export Preview</h2>
+      <table class="table">
+        <tr><th>Staff</th><th>Hours</th><th>Gross Pay</th></tr>
+        ${db.Staff.map(st=>{
+          const approved=db.TimesheetEntries.filter(t=>t.StaffId===st.Id && t.IsApproved).reduce((sum,t)=>sum+(t.ApprovedHours||0),0);
+          return `<tr><td>${st.Name}</td><td>${approved}</td><td>${money(approved*st.HourlyRate)}</td></tr>`;
+        }).join('')}
+      </table>
+      <div class="export-row">
+        <button onclick="downloadPayrollCSV()">Download Payroll CSV</button>
+        <button class="secondary" onclick="fakeExport('Sage Payroll Export')">Sage Export</button>
+        <button class="secondary" onclick="fakeExport('Xero Payroll Export')">Xero Export</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+function proposalView(){
+  const db=getDB(), comm=db.Commercials, saving=comm.CurrentAgencySpend-comm.OptimisedAgencySpend;
+  return `
+  <section class="hero">
+    <div class="glass">
+      <span class="badge good">Close the meeting here</span>
+      <h1 class="hero-title">30-day pilot proposal for <span class="gradient-text">${db.ClientProfile.HomeName}</span></h1>
+      <p>${db.ClientProfile.PresenterNote}</p>
+      <div class="pill-row">
+        <button onclick="downloadPilotProposal()">Download Pilot Proposal CSV</button>
+        <button class="secondary" onclick="openPresentation()">Open Presentation Mode</button>
+      </div>
+    </div>
+    <div class="glass roi-box">
+      <h2>Commercial Case</h2>
+      <div class="item"><div class="item-header"><b>Monthly saving opportunity</b><span class="good">${money(saving)}</span></div></div>
+      <div class="item"><div class="item-header"><b>Annualised opportunity</b><span class="good">${money(saving*12)}</span></div></div>
+      <div class="item"><div class="item-header"><b>Pilot price</b><span>${money(comm.PilotPrice)}</span></div></div>
+      <div class="item"><div class="item-header"><b>Suggested ongoing plan</b><span>${money(comm.SuggestedMonthlyPrice)}/month</span></div></div>
+    </div>
+  </section>
+
+  <section class="grid-3">
+    <div class="glass">
+      <h2>Week 1</h2>
+      <p>Import staff, units, resident dependency assumptions, shift patterns and training records.</p>
+    </div>
+    <div class="glass">
+      <h2>Week 2–3</h2>
+      <p>Run rota validation, punch clock, timesheet approvals, training alerts and safe-staffing dashboard.</p>
+    </div>
+    <div class="glass">
+      <h2>Week 4</h2>
+      <p>Review agency spend, payroll variance, compliance alerts resolved and manager admin time saved.</p>
+    </div>
+  </section>
+
+  <section class="glass" style="margin-top:16px">
+    <h2>Success Metrics</h2>
+    <table class="table">
+      <tr><th>Metric</th><th>Target</th><th>Why client cares</th></tr>
+      <tr><td>Agency spend reduction</td><td>8–15%</td><td>Direct monthly savings</td></tr>
+      <tr><td>Payroll approval time</td><td>50% faster</td><td>Less admin and fewer disputes</td></tr>
+      <tr><td>Unsafe shift assignments</td><td>Blocked before publishing</td><td>Reduced compliance risk</td></tr>
+      <tr><td>Training expiry alerts</td><td>100% visible</td><td>CQC evidence readiness</td></tr>
+      <tr><td>Safe-staffing gaps</td><td>Visible daily</td><td>Better operational control</td></tr>
+    </table>
+  </section>
+
+  <section class="grid-3" style="margin-top:16px">
+    <div class="glass"><h2>Starter</h2><div class="kpi"><div class="num">£299</div><div class="label">per home / month</div></div><p>Rota, punch clock, timesheets.</p></div>
+    <div class="glass"><h2>Growth</h2><div class="kpi"><div class="num">£599</div><div class="label">per home / month</div></div><p>Compliance, payroll exports, training matrix, alerts.</p></div>
+    <div class="glass"><h2>Enterprise</h2><div class="kpi"><div class="num">Custom</div><div class="label">multi-home groups</div></div><p>BI dashboards, integrations, audit packs, SSO.</p></div>
+  </section>`;
+}
+
+function staffDashboard(){
+  const st=activeStaff(), db=getDB(), myShifts=db.ScheduledShifts.filter(s=>s.StaffId===st.Id);
+  return `<section class="hero">
+    <div class="glass"><span class="badge">${roleLabel(st.Role)}</span><h1 class="hero-title">Welcome, <span class="gradient-text">${st.Name.split(' ')[0]}</span></h1><p>Staff can view shifts, clock in/out and submit requests without manager-only data.</p></div>
+    <div class="glass"><h2>My Status</h2><div class="item"><div class="item-header"><b>Training score</b><span class="good">${st.TrainingScore}%</span></div></div><div class="item"><div class="item-header"><b>DBS</b><span class="good">${st.DBS}</span></div></div><div class="item"><div class="item-header"><b>Contracted hours</b><span>${st.ContractedHours}</span></div></div></div>
+  </section>
+  <section class="glass"><h2>My Upcoming Shifts</h2>${myShifts.map(s=>`<div class="item"><div class="item-header"><b>${s.Unit}</b><span>${duration(s.StartTime,s.EndTime)} hrs</span></div><p>${fmt(s.StartTime)} → ${fmt(s.EndTime)}</p></div>`).join('') || '<p>No upcoming shifts.</p>'}</section>`;
+}
+
+function staffClock(){
+  const st=activeStaff(), db=getDB(), active=db.TimesheetEntries.find(t=>t.StaffId===st.Id&&!t.ActualClockOut), next=db.ScheduledShifts.find(s=>s.StaffId===st.Id);
+  return `<section class="grid-2"><div class="glass"><h2>Live Punch Clock</h2><p>${active?'You are currently clocked in.':'Clock in against your scheduled shift.'}</p>${active?`<button class="danger" onclick="clockOut(${active.Id})">Clock Out Now</button>`:`<button onclick="clockIn(${st.Id}, ${next?next.Id:'null'})">Clock In Now</button>`}</div>
+    <div class="glass"><h2>Recent Timesheets</h2>${db.TimesheetEntries.filter(t=>t.StaffId===st.Id).map(t=>`<div class="item"><b>${fmt(t.ActualClockIn)}</b><p>Out: ${t.ActualClockOut?fmt(t.ActualClockOut):'Active'}<br>Status: ${t.IsApproved?'Approved':'Pending'}</p></div>`).join('') || '<p>No entries yet.</p>'}</div></section>`;
+}
+
+function staffRequests(){
+  const st=activeStaff(), db=getDB();
+  return `<section class="grid-2"><div class="glass"><h2>Request Leave</h2><label>Type</label><select id="reqType"><option>Annual Leave</option><option>Sickness</option><option>Training Day</option></select><label>Date</label><input id="reqDate" type="date"><button onclick="submitRequest(${st.Id})">Submit Request</button></div>
+    <div class="glass"><h2>My Requests</h2>${db.LeaveRequests.filter(r=>r.StaffId===st.Id).map(r=>`<div class="item"><div class="item-header"><b>${r.Type}</b><span class="warn-text">${r.Status}</span></div><p>${new Date(r.Date).toLocaleDateString()}</p></div>`).join('') || '<p>No requests.</p>'}</div></section>`;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+window.saveBranding=function(){
+  const db=getDB();
+  db.ClientProfile.HomeName=document.getElementById('brandHome').value || 'Care Home';
+  db.ClientProfile.Location=document.getElementById('brandLocation').value || 'UK';
+  db.AuditLog.unshift({Time:iso(new Date()),Text:`Client branding updated to ${db.ClientProfile.HomeName}.`});
+  saveDB(db);
+  toast('Client branding applied.');
+};
+
+window.addShift=function(){
+  const staffId=Number(document.getElementById('newStaff').value);
+  const unit=document.getElementById('newUnit').value;
+  const start=document.getElementById('newStart').value;
+  const end=document.getElementById('newEnd').value;
+  const check=complianceCheck(staffId,start,end);
+  const msg=document.getElementById('shiftMsg');
+  if(!check.ok){
+    msg.innerHTML=`<div class="item big-alert"><b class="bad-text">Assignment blocked</b><p>${check.msg}</p></div>`;
+    toast(check.msg);
+    return;
+  }
+  const db=getDB(), st=staffById(staffId);
+  db.ScheduledShifts.push({Id:uid(),StaffId:staffId,StartTime:iso(start),EndTime:iso(end),RequiredRole:st.Role,Unit:unit,Status:'Published'});
+  db.AuditLog.unshift({Time:iso(new Date()),Text:`Compliant shift assigned to ${st.Name} for ${unit}.`});
+  saveDB(db);
+  toast(check.msg);
+};
+
+window.simulateUnsafeShift=function(){
+  const s=getDB().ScheduledShifts[0];
+  document.getElementById('newStaff').value=s.StaffId;
+  document.getElementById('newUnit').value=s.Unit;
+  document.getElementById('newStart').value=s.StartTime.slice(0,16);
+  document.getElementById('newEnd').value=s.EndTime.slice(0,16);
+  document.getElementById('shiftMsg').innerHTML='<div class="item big-alert"><b class="bad-text">Unsafe scenario loaded</b><p>Click Assign Shift to show an overlap/compliance rejection.</p></div>';
+};
+
+window.loadSafeFix=function(){
+  const ai=aiSuggestion();
+  document.getElementById('newStaff').value=ai.best.st.Id;
+  document.getElementById('newUnit').value=ai.unit;
+  document.getElementById('newStart').value=ai.start.toISOString().slice(0,16);
+  document.getElementById('newEnd').value=ai.end.toISOString().slice(0,16);
+  document.getElementById('shiftMsg').innerHTML='<div class="item"><b class="good">Safe AI fix loaded</b><p>Click Assign Shift to close a coverage risk safely.</p></div>';
+};
+
+window.assignAISuggestion=function(){
+  const ai=aiSuggestion();
+  if(!ai.best.check.ok){toast(ai.best.check.msg);return}
+  const db=getDB(), st=ai.best.st;
+  db.ScheduledShifts.push({Id:uid(),StaffId:st.Id,StartTime:iso(ai.start),EndTime:iso(ai.end),RequiredRole:st.Role,Unit:ai.unit,Status:'Published'});
+  db.AuditLog.unshift({Time:iso(new Date()),Text:`AI suggested compliant shift assigned to ${st.Name} for ${ai.unit}.`});
+  saveDB(db);
+  toast(`AI suggestion assigned: ${st.Name} for ${ai.unit}.`);
+};
+
+window.dragShift=function(e,id){draggedShiftId=id};
+window.allowDrop=function(e){e.preventDefault()};
+window.dropShift=function(e,dayIso){
+  e.preventDefault();
+  e.currentTarget.classList.remove('dropzone');
+  if(!draggedShiftId)return;
+  const db=getDB(), s=db.ScheduledShifts.find(x=>x.Id===draggedShiftId);
+  const oldStart=new Date(s.StartTime), oldEnd=new Date(s.EndTime), newDay=new Date(dayIso);
+  const newStart=new Date(newDay);
+  newStart.setHours(oldStart.getHours(),oldStart.getMinutes(),0,0);
+  const newEnd=addHours(newStart,duration(oldStart,oldEnd));
+  const check=complianceCheck(s.StaffId,newStart,newEnd,s.Id);
+  if(!check.ok){toast(check.msg);render();return}
+  s.StartTime=iso(newStart); s.EndTime=iso(newEnd);
+  db.AuditLog.unshift({Time:iso(new Date()),Text:`Shift moved safely for ${staffById(s.StaffId).Name}.`});
+  draggedShiftId=null;
+  saveDB(db);
+  toast('Shift moved safely. Compliance checks passed.');
+};
+
+window.showShift=function(id){
+  const s=findShift(id), st=staffById(s.StaffId);
+  openModal('Shift Details',`<div class="item"><b>${st.Name}</b><p>${roleLabel(st.Role)}<br>${s.Unit}<br>${fmt(s.StartTime)} → ${fmt(s.EndTime)}<br>${duration(s.StartTime,s.EndTime)} hours</p></div>`);
+};
+
+window.approveTimesheet=function(id){
+  const db=getDB(), t=db.TimesheetEntries.find(x=>x.Id===id);
+  t.ApprovedHours=parseFloat(document.getElementById('approved_'+id).value||0);
+  t.IsApproved=true;
+  db.AuditLog.unshift({Time:iso(new Date()),Text:`Timesheet approved for ${staffById(t.StaffId).Name}.`});
+  saveDB(db);
+  toast('Timesheet approved and included in payroll export.');
+};
+
+window.clockIn=function(staffId,shiftId){
+  const db=getDB();
+  db.TimesheetEntries.push({Id:uid(),StaffId:staffId,ScheduledShiftId:shiftId,ActualClockIn:iso(new Date()),ActualClockOut:null,ApprovedHours:0,IsApproved:false});
+  saveDB(db);
+  toast('Clock-in recorded.');
+};
+window.clockOut=function(id){
+  const db=getDB(), t=db.TimesheetEntries.find(x=>x.Id===id);
+  t.ActualClockOut=iso(new Date());
+  saveDB(db);
+  toast('Clock-out recorded. Timesheet sent for approval.');
+};
+window.submitRequest=function(staffId){
+  const db=getDB();
+  const date=document.getElementById('reqDate').value;
+  db.LeaveRequests.push({Id:uid(),StaffId:staffId,Type:document.getElementById('reqType').value,Date:date,Status:'Pending'});
+  saveDB(db);
+  toast('Request submitted to manager.');
+};
+
+function makeCSV(rows){
+  return rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+}
+function downloadFile(filename,content,type='text/csv'){
+  const blob=new Blob([content],{type});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  toast(`${filename} downloaded.`);
+}
+window.downloadPayrollCSV=function(){
+  const db=getDB();
+  const rows=[['Staff','Role','Approved Hours','Rate','Gross Pay']];
+  db.Staff.forEach(st=>{
+    const hrs=db.TimesheetEntries.filter(t=>t.StaffId===st.Id && t.IsApproved).reduce((sum,t)=>sum+(t.ApprovedHours||0),0);
+    rows.push([st.Name,roleLabel(st.Role),hrs,st.HourlyRate,(hrs*st.HourlyRate).toFixed(2)]);
+  });
+  downloadFile('careflow-payroll-export.csv',makeCSV(rows));
+};
+window.downloadRotaCSV=function(){
+  const db=getDB();
+  const rows=[['Staff','Role','Unit','Start','End','Hours','Status']];
+  db.ScheduledShifts.forEach(s=>{
+    const st=staffById(s.StaffId);
+    rows.push([st.Name,roleLabel(st.Role),s.Unit,s.StartTime,s.EndTime,duration(s.StartTime,s.EndTime),s.Status]);
+  });
+  downloadFile('careflow-rota-export.csv',makeCSV(rows));
+};
+window.downloadTrainingCSV=function(){
+  const db=getDB();
+  const rows=[['Staff','Training','Expiry Date','Days Remaining','Status']];
+  db.TrainingRecords.forEach(t=>{
+    const st=staffById(t.StaffId), days=daysUntil(t.ExpiryDate);
+    rows.push([st.Name,t.Name,t.ExpiryDate,days,days<45?'Alert':'OK']);
+  });
+  downloadFile('careflow-training-matrix.csv',makeCSV(rows));
+};
+window.downloadEvidencePack=function(){
+  const db=getDB();
+  const rows=[['Evidence Area','Status','Generated For'],['Safe Staffing Rota','Ready',db.ClientProfile.HomeName],['Training Matrix','Ready',db.ClientProfile.HomeName],['Medication Variance Audit','Review',db.ClientProfile.HomeName],['Incident Register','Ready',db.ClientProfile.HomeName],['Audit Trail','Ready',db.ClientProfile.HomeName]];
+  downloadFile('careflow-cqc-evidence-pack.csv',makeCSV(rows));
+};
+window.downloadPilotProposal=function(){
+  const db=getDB(), c=db.Commercials, saving=c.CurrentAgencySpend-c.OptimisedAgencySpend;
+  const rows=[['Pilot Proposal',db.ClientProfile.HomeName],['Location',db.ClientProfile.Location],['Pilot Length','30 days'],['Pilot Price',c.PilotPrice],['Current Agency Spend',c.CurrentAgencySpend],['Optimised Agency Forecast',c.OptimisedAgencySpend],['Projected Monthly Saving',saving],['Annualised Saving',saving*12],['Success Metric 1','Reduce agency spend by 8-15%'],['Success Metric 2','Reduce payroll approval time by 50%'],['Success Metric 3','Make training expiry alerts visible'],['Success Metric 4','Block unsafe shifts before publishing']];
+  downloadFile('careflow-pilot-proposal.csv',makeCSV(rows));
+};
+window.fakeExport=function(name){
+  openModal(name,`<div class="item"><b class="good">${name} generated</b><p>This simulated export represents an integration-ready production action.</p></div>`);
+};
+
+function presentationSlides(){
+  const db=getDB(), c=db.Commercials, saving=c.CurrentAgencySpend-c.OptimisedAgencySpend, ai=aiSuggestion();
+  return [
+    `<div class="slide"><span class="badge good">Opening</span><h1>${db.ClientProfile.HomeName} has three daily pressures: <span class="gradient-text">staffing gaps, compliance risk and rising agency cost.</span></h1><p>CareFlow Pro brings those risks into one operational dashboard.</p></div>`,
+    `<div class="slide"><span class="badge warn">Problem</span><h1>Today, ${money(c.CurrentAgencySpend+c.PayrollLeakage)} is at risk this month.</h1><div class="grid-3"><div class="item"><b>Agency forecast</b><h2 class="bad-text">${money(c.CurrentAgencySpend)}</h2></div><div class="item"><b>Payroll leakage</b><h2 class="warn-text">${money(c.PayrollLeakage)}</h2></div><div class="item"><b>Training alerts</b><h2>${getDB().TrainingRecords.filter(t=>daysUntil(t.ExpiryDate)<45).length}</h2></div></div></div>`,
+    `<div class="slide"><span class="badge bad">Compliance Demo</span><h1>Unsafe rota assignments are blocked before they become operational risk.</h1><p>Use the Smart Rota tab and click “Try unsafe shift” to show a real rejection message with the exact UK rule breach.</p><button onclick="closeModal();demoStep(2)">Run unsafe assignment demo</button></div>`,
+    `<div class="slide"><span class="badge">AI Suggestion</span><h1>The system suggests a compliant fix instead of leaving the manager in a spreadsheet.</h1><div class="item"><b>${ai.best.st.Name}</b><p>${ai.unit} · ${fmt(ai.start)} → ${fmt(ai.end)}<br>${ai.best.check.msg}</p></div><button onclick="closeModal();demoStep(3)">Apply AI safe fix</button></div>`,
+    `<div class="slide"><span class="badge">Payroll</span><h1>Scheduled vs actual hours are compared before payroll export.</h1><p>This reduces disputes, leakage and manual admin.</p><button onclick="closeModal();demoStep(4)">Open payroll workflow</button></div>`,
+    `<div class="slide"><span class="badge good">Commercial Close</span><h1>Projected saving: <span class="gradient-text">${money(saving)}/month</span> or ${money(saving*12)}/year.</h1><p>Propose a 30-day pilot focused on agency reduction, payroll time saved and CQC evidence readiness.</p><button onclick="closeModal();demoStep(5)">Open pilot proposal</button></div>`
+  ];
+}
+window.openPresentation=function(){
+  presentationIndex=0;
+  renderPresentation();
+};
+function renderPresentation(){
+  const slides=presentationSlides();
+  openModal('Presentation Mode',`${slides[presentationIndex]}
+    <div class="item-header" style="margin-top:16px">
+      <button class="secondary" onclick="prevSlide()" ${presentationIndex===0?'disabled':''}>Previous</button>
+      <span class="muted">Slide ${presentationIndex+1} of ${slides.length}</span>
+      <button onclick="nextSlide()">${presentationIndex===slides.length-1?'Finish':'Next'}</button>
+    </div>`);
+}
+window.nextSlide=function(){
+  const slides=presentationSlides();
+  if(presentationIndex>=slides.length-1){closeModal();return}
+  presentationIndex++;
+  renderPresentation();
+};
+window.prevSlide=function(){if(presentationIndex>0){presentationIndex--;renderPresentation()}};
+
+window.demoStep=function(n){
+  session.value='Care Manager';
+  if(n===1){currentTab='command';render();toast('Start here: staffing gaps, money at risk and next compliance risk.')}
+  if(n===2){currentTab='rota';render();setTimeout(simulateUnsafeShift,100);toast('Unsafe shift loaded. Click Assign Shift to show the rejection.')}
+  if(n===3){currentTab='rota';render();setTimeout(loadSafeFix,100);toast('Safe AI fix loaded. Click Assign Shift to show compliant scheduling.')}
+  if(n===4){currentTab='payroll';render();toast('Approve a timesheet, then download payroll CSV.')}
+  if(n===5){currentTab='proposal';render();toast('Close with the 30-day pilot and ROI case.')}
+};
+
+function openModal(title,body){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4300);
+}
+
+function render(){
+  renderShell();
+  const app=document.getElementById('app');
+  if(session.value==='Care Manager'){
+    if(!managerTabs.some(t=>t[0]===currentTab)) currentTab='command';
+    app.innerHTML={
+      command:commandView(),
+      rota:rotaView(),
+      compliance:complianceView(),
+      payroll:payrollView(),
+      proposal:proposalView()
+    }[currentTab];
+  }else{
+    if(!staffTabs.some(t=>t[0]===currentTab)) currentTab='my';
+    app.innerHTML={
+      my:staffDashboard(),
+      clock:staffClock(),
+      requests:staffRequests()
+    }[currentTab];
+  }
+}
+render();
+</script>
+</body>
+</html>
