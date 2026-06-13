@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CareFlow Pro — Client-Ready Care Home Demo</title>
+<title>CareFlow Pro — Client-Ready Care Home Demo Fixed</title>
 <style>
 :root{
   --bg0:#030712;
@@ -175,7 +175,6 @@ a{color:var(--cyan)}
 }
 .gradient-text{
   background:linear-gradient(135deg,#fff,var(--cyan),#a8b2ff);
-  background-clip: text;
   -webkit-background-clip:text;
   color:transparent;
 }
@@ -476,37 +475,75 @@ function roleLabel(role){
 }
 function findShift(id){return getDB().ScheduledShifts.find(s=>s.Id==id)}
 
-function complianceCheck(staffId,start,end,excludeId=null){
-  const db=getDB();
-  const ns=new Date(start), ne=new Date(end);
-  if(!start||!end||isNaN(ns)||isNaN(ne)||ne<=ns) return {ok:false,msg:'Choose a valid start and end time.'};
-  const shifts=db.ScheduledShifts.filter(s=>s.StaffId==staffId && s.Id!==excludeId);
-  const staff=staffById(staffId);
-  for(const s of shifts){
-    const ss=new Date(s.StartTime), se=new Date(s.EndTime);
-    if(ns<se && ne>ss){
-      return {ok:false,msg:`Rejected: ${staff.Name} already has an overlapping shift at this time.`};
+function complianceCheck(staffId, start, end, excludeId=null) {
+  const db = getDB();
+  const ns = new Date(start), ne = new Date(end);
+
+  if (!start || !end || isNaN(ns) || isNaN(ne) || ne <= ns) {
+    return { ok: false, msg: 'Choose a valid start and end time.' };
+  }
+
+  const staff = staffById(staffId);
+  const REQUIRED_REST = 11;
+
+  const shifts = db.ScheduledShifts
+    .filter(s => s.StaffId == staffId && s.Id !== excludeId)
+    .sort((a, b) => new Date(a.StartTime) - new Date(b.StartTime));
+
+  for (const s of shifts) {
+    const ss = new Date(s.StartTime), se = new Date(s.EndTime);
+
+    const breaksOverlap = !(ne <= ss || ns >= se);
+    if (breaksOverlap) {
+      return {
+        ok: false,
+        msg: `Rejected: ${staff.Name} already has an overlapping shift at this time (${timeOnly(ss)} - ${timeOnly(se)}).`
+      };
     }
-    const restAfterPrevious=(ns-se)/MS_HOUR;
-    const restBeforeNext=(ss-ne)/MS_HOUR;
-    if(restAfterPrevious>=0 && restAfterPrevious<11){
-      return {ok:false,msg:`Rejected: ${staff.Name} would only have ${restAfterPrevious.toFixed(1)} hours rest after the previous shift. UK daily rest rule requires 11.`};
+
+    if (ns >= se) {
+      const rest = (ns - se) / MS_HOUR;
+      if (rest < REQUIRED_REST) {
+        return {
+          ok: false,
+          msg: `Rejected: Insufficient rest. ${staff.Name} only has ${rest.toFixed(1)} hours rest after the shift ending at ${fmt(se)}.`
+        };
+      }
     }
-    if(restBeforeNext>=0 && restBeforeNext<11){
-      return {ok:false,msg:`Rejected: ${staff.Name} would only have ${restBeforeNext.toFixed(1)} hours rest before the next shift. UK daily rest rule requires 11.`};
+
+    if (ne <= ss) {
+      const rest = (ss - ne) / MS_HOUR;
+      if (rest < REQUIRED_REST) {
+        return {
+          ok: false,
+          msg: `Rejected: Insufficient rest. ${staff.Name} only has ${rest.toFixed(1)} hours rest before the shift starting at ${fmt(ss)}.`
+        };
+      }
     }
   }
-  const windowStart=new Date(ns.getTime()-7*24*MS_HOUR);
-  const windowEnd=new Date(ns.getTime()+7*24*MS_HOUR);
-  let total=duration(ns,ne);
-  shifts.forEach(s=>{
-    const ss=new Date(s.StartTime);
-    if(ss>=windowStart && ss<=windowEnd) total+=duration(s.StartTime,s.EndTime);
+
+  const windowStart = new Date(ns.getTime() - (3.5 * 24 * MS_HOUR));
+  const windowEnd = new Date(ns.getTime() + (3.5 * 24 * MS_HOUR));
+  let rollingHours = duration(ns, ne);
+
+  shifts.forEach(s => {
+    const ss = new Date(s.StartTime);
+    if (ss >= windowStart && ss <= windowEnd) {
+      rollingHours += duration(s.StartTime, s.EndTime);
+    }
   });
-  if(total>48){
-    return {ok:false,msg:`Rejected: rolling 7-day total would become ${total.toFixed(1)} hours. UK weekly working-time limit is 48.`};
+
+  if (rollingHours > 48) {
+    return {
+      ok: false,
+      msg: `Rejected: Total working time in this 7-day window would reach ${rollingHours.toFixed(1)} hours (UK Statutory Limit: 48).`
+    };
   }
-  return {ok:true,msg:'Accepted: no overlap, 11-hour rest preserved, and rolling 48-hour limit safe.'};
+
+  return {
+    ok: true,
+    msg: 'Accepted: No conflicts. 11h daily rest and 48h weekly limit are fully preserved.'
+  };
 }
 
 function coverageForUnit(unitName,day=new Date()){
@@ -1003,17 +1040,37 @@ window.approveTimesheet=function(id){
   toast('Timesheet approved and included in payroll export.');
 };
 
-window.clockIn=function(staffId,shiftId){
-  const db=getDB();
-  db.TimesheetEntries.push({Id:uid(),StaffId:staffId,ScheduledShiftId:shiftId,ActualClockIn:iso(new Date()),ActualClockOut:null,ApprovedHours:0,IsApproved:false});
+window.clockIn = function(staffId, shiftId) {
+  const db = getDB();
+  db.TimesheetEntries.push({
+    Id: uid(),
+    StaffId: staffId,
+    ScheduledShiftId: shiftId,
+    ActualClockIn: iso(new Date()),
+    ActualClockOut: null,
+    ApprovedHours: 0,
+    IsApproved: false
+  });
+  db.AuditLog.unshift({
+    Time: iso(new Date()),
+    Text: `${staffById(staffId).Name} clocked in securely via mobile app.`
+  });
   saveDB(db);
-  toast('Clock-in recorded.');
+  toast('Clock-in recorded in system logs.');
 };
-window.clockOut=function(id){
-  const db=getDB(), t=db.TimesheetEntries.find(x=>x.Id===id);
-  t.ActualClockOut=iso(new Date());
+window.clockOut = function(id) {
+  const db = getDB(), t = db.TimesheetEntries.find(x => x.Id === id);
+  if (!t) {
+    toast('Unable to find the active timesheet entry.');
+    return;
+  }
+  t.ActualClockOut = iso(new Date());
+  db.AuditLog.unshift({
+    Time: iso(new Date()),
+    Text: `${staffById(t.StaffId).Name} clocked out securely via mobile app.`
+  });
   saveDB(db);
-  toast('Clock-out recorded. Timesheet sent for approval.');
+  toast('Clock-out recorded. Timesheet sent to manager queue.');
 };
 window.submitRequest=function(staffId){
   const db=getDB();
